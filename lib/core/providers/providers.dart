@@ -9,6 +9,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../constants/role_tags.dart';
 import '../models/models.dart';
 import '../mock/mock_data.dart';
 
@@ -66,9 +67,43 @@ final clubProvider =
 
 // ── Club Members ───────────────────────────────────────────────────────────────
 
+// Mutable per-club member list: admin ops (role change, remove) write here
+class DemoMembersNotifier extends StateNotifier<List<ClubMemberModel>> {
+  DemoMembersNotifier(String clubId)
+      : super(List<ClubMemberModel>.from(kMockMembers[clubId] ?? []));
+
+  void changeRole(String uid, ClubRoleTag newRole) {
+    state = state.map((m) {
+      if (m.uid != uid) return m;
+      return ClubMemberModel(
+        uid: m.uid,
+        displayName: m.displayName,
+        avatarUrl: m.avatarUrl,
+        roleTag: newRole.name,
+        joinedAt: m.joinedAt,
+        isAdmin: m.isAdmin,
+        rollNo: m.rollNo,
+      );
+    }).toList();
+  }
+
+  void removeMember(String uid) =>
+      state = state.where((m) => m.uid != uid).toList();
+
+  void addMember(ClubMemberModel member) {
+    if (state.any((m) => m.uid == member.uid)) return;
+    state = [...state, member];
+  }
+}
+
+final demoMembersProvider = StateNotifierProvider
+    .family<DemoMembersNotifier, List<ClubMemberModel>, String>(
+  (ref, clubId) => DemoMembersNotifier(clubId),
+);
+
 final clubMembersProvider =
     StreamProvider.autoDispose.family<List<ClubMemberModel>, String>((ref, clubId) {
-  if (kDemoMode) return Stream.value(kMockMembers[clubId] ?? []);
+  if (kDemoMode) return Stream.value(ref.watch(demoMembersProvider(clubId)));
   return Stream.value([]);
 });
 
@@ -77,7 +112,7 @@ final isMemberProvider =
   if (kDemoMode) {
     final uid = ref.watch(currentUidProvider);
     if (uid == null) return false;
-    return (kMockMembers[clubId] ?? []).any((m) => m.uid == uid);
+    return ref.read(demoMembersProvider(clubId)).any((m) => m.uid == uid);
   }
   return false;
 });
@@ -87,7 +122,7 @@ final memberRoleProvider =
   if (kDemoMode) {
     final uid = ref.watch(currentUidProvider);
     if (uid == null) return null;
-    final members = kMockMembers[clubId] ?? [];
+    final members = ref.read(demoMembersProvider(clubId));
     try {
       return members.firstWhere((m) => m.uid == uid);
     } catch (_) {
@@ -99,19 +134,37 @@ final memberRoleProvider =
 
 // ── Events ─────────────────────────────────────────────────────────────────────
 
+// Demo-created events live here; merged into eventsProvider below
+class DemoEventNotifier extends StateNotifier<List<EventModel>> {
+  DemoEventNotifier() : super([]);
+  void createEvent(EventModel e) => state = [...state, e];
+  void updateEvent(EventModel updated) =>
+      state = state.map((e) => e.id == updated.id ? updated : e).toList();
+  void deleteEvent(String id) =>
+      state = state.where((e) => e.id != id).toList();
+}
+
+final demoCreatedEventsProvider =
+    StateNotifierProvider<DemoEventNotifier, List<EventModel>>(
+  (ref) => DemoEventNotifier(),
+);
+
 final eventsProvider = StreamProvider.autoDispose<List<EventModel>>((ref) {
-  if (kDemoMode) return Stream.value(kMockEvents);
+  if (kDemoMode) {
+    final extra = ref.watch(demoCreatedEventsProvider);
+    return Stream.value([...kMockEvents, ...extra]);
+  }
   return Stream.value([]);
 });
 
 final eventProvider =
     StreamProvider.autoDispose.family<EventModel?, String>((ref, eventId) {
   if (kDemoMode) {
-    final event = kMockEvents.cast<EventModel?>().firstWhere(
-          (e) => e?.id == eventId,
-          orElse: () => null,
-        );
-    return Stream.value(event);
+    final all = ref.watch(eventsProvider).valueOrNull ?? [];
+    return Stream.value(all.cast<EventModel?>().firstWhere(
+      (e) => e?.id == eventId,
+      orElse: () => null,
+    ));
   }
   return Stream.value(null);
 });
@@ -119,7 +172,8 @@ final eventProvider =
 final clubEventsProvider =
     StreamProvider.autoDispose.family<List<EventModel>, String>((ref, clubId) {
   if (kDemoMode) {
-    return Stream.value(kMockEvents.where((e) => e.clubId == clubId).toList());
+    final all = ref.watch(eventsProvider).valueOrNull ?? [];
+    return Stream.value(all.where((e) => e.clubId == clubId).toList());
   }
   return Stream.value([]);
 });

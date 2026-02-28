@@ -5,6 +5,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/colors.dart';
+import '../../../core/constants/role_tags.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
@@ -200,9 +201,11 @@ class ExploreScreen extends ConsumerWidget {
                 final filtered = filter == 'All'
                     ? events
                     : events.where((e) {
-                        return e.clubName.toLowerCase().contains(filter.toLowerCase()) ||
-                            e.eventType.toLowerCase().contains(filter.toLowerCase()) ||
-                            e.tags.any((t) => t.toLowerCase() == filter.toLowerCase());
+                        final typeLabel =
+                            EventType.fromString(e.eventType).label.toLowerCase();
+                        return typeLabel == filter.toLowerCase() ||
+                            e.tags.any(
+                                (t) => t.toLowerCase() == filter.toLowerCase());
                       }).toList();
 
                 if (filtered.isEmpty) {

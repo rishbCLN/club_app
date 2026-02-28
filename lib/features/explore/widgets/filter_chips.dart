@@ -10,7 +10,10 @@ import '../../../core/providers/providers.dart';
 class FilterChipsRow extends ConsumerWidget {
   const FilterChipsRow({super.key});
 
-  static const _filters = ['All', 'Tech', 'Design', 'Cultural', 'Hackathon', 'Literary'];
+  static List<String> get filters => [
+        'All',
+        ...EventType.values.map((e) => e.label),
+      ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,10 +24,10 @@ class FilterChipsRow extends ConsumerWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _filters.length,
+        itemCount: filters.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          final filter = _filters[index];
+          final filter = filters[index];
           final isActive = selected == filter;
           final color = _colorForFilter(filter);
 
@@ -46,15 +49,33 @@ class FilterChipsRow extends ConsumerWidget {
                     ? [BoxShadow(color: color.withOpacity(0.2), blurRadius: 8)]
                     : [],
               ),
-              child: Text(
-                filter,
-                style: NexusText.tag.copyWith(
-                  color: isActive ? color : NexusColors.textMuted,
-                  fontSize: 11,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (filter != 'All') ...[
+                    Text(
+                      EventType.values
+                          .firstWhere((e) => e.label == filter,
+                              orElse: () => EventType.meetup)
+                          .icon,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: isActive ? color : NexusColors.textMuted,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                  ],
+                  Text(
+                    filter,
+                    style: NexusText.tag.copyWith(
+                      color: isActive ? color : NexusColors.textMuted,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ).animate(delay: Duration(milliseconds: index * 60))
+          ).animate(delay: Duration(milliseconds: index * 40))
               .fadeIn(duration: 300.ms)
               .slideX(begin: 0.1, end: 0);
         },
@@ -63,13 +84,12 @@ class FilterChipsRow extends ConsumerWidget {
   }
 
   Color _colorForFilter(String filter) {
-    return switch (filter) {
-      'Tech' => NexusColors.cyan,
-      'Design' => NexusColors.orange,
-      'Cultural' => NexusColors.rose,
-      'Hackathon' => NexusColors.emerald,
-      'Literary' => NexusColors.violet,
-      _ => NexusColors.textSecondary,
-    };
+    if (filter == 'All') return NexusColors.textSecondary;
+    try {
+      return EventType.values.firstWhere((e) => e.label == filter).color;
+    } catch (_) {
+      return NexusColors.textSecondary;
+    }
   }
 }
+

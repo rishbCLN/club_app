@@ -31,19 +31,40 @@ enum ClubRoleTag {
   }
 }
 
+// ── Admin Roles ────────────────────────────────────────────────────────────────
+
+/// Roles that grant access to the Admin Panel
+const kAdminRoles = {
+  ClubRoleTag.seniorCore,
+  ClubRoleTag.techHead,
+  ClubRoleTag.marketingHead,
+  ClubRoleTag.designLead,
+  ClubRoleTag.eventHead,
+  ClubRoleTag.outreachLead,
+};
+
 // ── Event Types ───────────────────────────────────────────────────────────────
 
 enum EventType {
-  hackathon('Hackathon', 0xFF00FFCC),
-  workshop('Workshop', 0xFFA78BFA),
-  cultural('Cultural', 0xFFFF6B9D),
-  sports('Sports', 0xFF34D399),
-  meetup('Meetup', 0xFF60A5FA),
-  fest('Fest', 0xFFFBBF24);
+  hackathon('Hackathon', '⬡', 0xFF00FFCC),
+  workshop('Workshop', '◈', 0xFFA78BFA),
+  cultural('Cultural', '◉', 0xFFFF6B9D),
+  sports('Sports', '◎', 0xFF34D399),
+  meetup('Meetup', '○', 0xFF60A5FA),
+  fest('Fest', '◇', 0xFFFBBF24),
 
-  const EventType(this.label, this.colorValue);
+  // ── New ──────────────────────────────────────────────────────────────────
+  recruitmentDrive('Recruitment Drive', '◈', 0xFFFF6B9D),
+  interclubCollab('Inter-Club Collab', '⬡', 0xFF00FFCC),
+  competition('Competition', '◉', 0xFFF97316),
+  seminar('Seminar', '◇', 0xFF94A3B8),
+  socialMixer('Social Mixer', '○', 0xFF34D399),
+  exhibition('Exhibition', '◈', 0xFFFBBF24);
+
+  const EventType(this.label, this.icon, this.colorValue);
 
   final String label;
+  final String icon;
   final int colorValue;
 
   Color get color => Color(colorValue);

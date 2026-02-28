@@ -2,8 +2,7 @@
 //
 // Set kDemoMode = true in providers.dart to use these instead of Firestore.
 // No Firebase connection is made in demo mode.
-
-import '../models/models.dart';
+import '../constants/role_tags.dart';import '../models/models.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Demo user (treated as "logged in")
@@ -311,6 +310,26 @@ final kMockEvents = <EventModel>[
     collaboratingClubs: [],
     tags: ['ml', 'python', 'beginner'],
   ),
+
+  // ── Recruitment Drive ───────────────────────────────────────────────────────
+  EventModel(
+    id: 'evt_cipher_recruitment',
+    title: 'Cipher Collective Recruitment 2026',
+    description:
+        'We are opening applications for new members across all verticals — tech, design, '
+        'marketing, and outreach. Come build something that matters.',
+    clubId: 'club_cipher',
+    clubName: 'Cipher Collective',
+    clubColorHex: '#00FFCC',
+    eventType: 'recruitmentDrive',
+    startDate: DateTime(2026, 3, 6, 10, 0),
+    endDate: DateTime(2026, 3, 6, 13, 0),
+    venue: 'CS Department Seminar Hall',
+    registrationLink: null,
+    collaboratingClubs: [],
+    tags: ['Open to All', 'Free Entry', 'Certificate'],
+    isPublic: true,
+  ),
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -609,3 +628,37 @@ final kMockMessages = <String, List<MessageModel>>{
     ),
   ],
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Join Requests  (key = clubId → list of requests)
+// ─────────────────────────────────────────────────────────────────────────────
+
+final kMockJoinRequests = <String, List<JoinRequestModel>>{
+  'club_cipher': [
+    JoinRequestModel(
+      id: 'req_1',
+      userId: 'u_10',
+      displayName: 'Kavya Sharma',
+      collegeRollNo: '22CS089',
+      requestedAt: DateTime.now().subtract(const Duration(hours: 3)),
+      status: JoinRequestStatus.pending,
+    ),
+    JoinRequestModel(
+      id: 'req_2',
+      userId: 'u_11',
+      displayName: 'Laksh Mehta',
+      collegeRollNo: '23EC012',
+      requestedAt: DateTime.now().subtract(const Duration(days: 1)),
+      status: JoinRequestStatus.pending,
+    ),
+    JoinRequestModel(
+      id: 'req_3',
+      userId: 'u_12',
+      displayName: 'Tanvi Rao',
+      collegeRollNo: '23CS041',
+      requestedAt: DateTime.now().subtract(const Duration(days: 2)),
+      status: JoinRequestStatus.approved,
+    ),
+  ],
+};
+

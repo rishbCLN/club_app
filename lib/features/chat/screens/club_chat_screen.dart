@@ -9,6 +9,7 @@ import '../../../core/constants/typography.dart';
 import '../../../core/mock/mock_data.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
+import '../../admin/providers/admin_providers.dart';
 import '../../../core/utils/extensions.dart';
 import '../../../shared/widgets/club_orb.dart';
 import '../../../shared/widgets/shimmer_loader.dart';
@@ -145,12 +146,13 @@ class _ClubChatScreenState extends ConsumerState<ClubChatScreen> {
         }
 
         final accentColor = club.colorHex.toColor();
+        final isAdmin = ref.watch(isClubAdminProvider(widget.clubId));
 
         return Scaffold(
           backgroundColor: NexusColors.bg,
           resizeToAvoidBottomInset: true,
           extendBodyBehindAppBar: true,
-          appBar: _ChatAppBar(club: club, accentColor: accentColor),
+          appBar: _ChatAppBar(club: club, accentColor: accentColor, isAdmin: isAdmin),
           body: Column(
             children: [
               // Messages
@@ -178,10 +180,15 @@ class _ClubChatScreenState extends ConsumerState<ClubChatScreen> {
 // ── Chat App Bar ───────────────────────────────────────────────────────────────
 
 class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _ChatAppBar({required this.club, required this.accentColor});
+  const _ChatAppBar({
+    required this.club,
+    required this.accentColor,
+    this.isAdmin = false,
+  });
 
   final ClubModel club;
   final Color accentColor;
+  final bool isAdmin;
 
   @override
   Widget build(BuildContext context) {
@@ -247,9 +254,14 @@ class _ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
               color: NexusColors.surfaceElevated,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               onSelected: (value) {
-                // TODO: implement menu actions
+                if (value == 'admin') {
+                  context.push('/club/${club.id}/admin');
+                }
+                // TODO: implement other menu actions
               },
               itemBuilder: (_) => [
+                if (isAdmin)
+                  _menuItem('admin', Icons.shield_outlined, 'Admin Panel'),
                 _menuItem('members', Icons.group_outlined, 'Members'),
                 _menuItem('pinned', Icons.push_pin_outlined, 'Pinned'),
                 _menuItem('settings', Icons.settings_outlined, 'Settings'),

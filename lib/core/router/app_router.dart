@@ -13,8 +13,15 @@ import '../../features/my_clubs/screens/my_clubs_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/onboarding/onboarding_screen.dart';
+import '../../features/admin/screens/club_admin_dashboard_screen.dart';
+import '../../features/admin/screens/create_event_screen.dart';
+import '../../features/admin/screens/edit_event_screen.dart';
+import '../../features/admin/screens/admin_members_screen.dart';
+import '../../features/admin/screens/join_requests_screen.dart';
 import '../../shared/widgets/nexus_shell.dart';
 import '../providers/providers.dart';
+import '../constants/role_tags.dart';
+import '../mock/mock_data.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final isLoggedIn = ref.watch(isLoggedInProvider);
@@ -121,6 +128,67 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return _buildPage(state, EventDetailScreen(eventId: eventId));
         },
       ),
+
+      // Admin Panel (heads only — guarded by redirect)
+      GoRoute(
+        path: '/club/:clubId/admin',
+        redirect: (context, state) {
+          final clubId = state.pathParameters['clubId']!;
+          return _adminGuard(clubId, state);
+        },
+        pageBuilder: (context, state) {
+          final clubId = state.pathParameters['clubId']!;
+          return _buildPage(state, ClubAdminDashboardScreen(clubId: clubId));
+        },
+        routes: [
+          GoRoute(
+            path: 'create-event',
+            redirect: (context, state) {
+              final clubId = state.pathParameters['clubId']!;
+              return _adminGuard(clubId, state);
+            },
+            pageBuilder: (context, state) {
+              final clubId = state.pathParameters['clubId']!;
+              return _buildPage(state, CreateEventScreen(clubId: clubId));
+            },
+          ),
+          GoRoute(
+            path: 'edit-event/:eventId',
+            redirect: (context, state) {
+              final clubId = state.pathParameters['clubId']!;
+              return _adminGuard(clubId, state);
+            },
+            pageBuilder: (context, state) {
+              final clubId = state.pathParameters['clubId']!;
+              final eventId = state.pathParameters['eventId']!;
+              return _buildPage(
+                  state, EditEventScreen(clubId: clubId, eventId: eventId));
+            },
+          ),
+          GoRoute(
+            path: 'members',
+            redirect: (context, state) {
+              final clubId = state.pathParameters['clubId']!;
+              return _adminGuard(clubId, state);
+            },
+            pageBuilder: (context, state) {
+              final clubId = state.pathParameters['clubId']!;
+              return _buildPage(state, AdminMembersScreen(clubId: clubId));
+            },
+          ),
+          GoRoute(
+            path: 'requests',
+            redirect: (context, state) {
+              final clubId = state.pathParameters['clubId']!;
+              return _adminGuard(clubId, state);
+            },
+            pageBuilder: (context, state) {
+              final clubId = state.pathParameters['clubId']!;
+              return _buildPage(state, JoinRequestsScreen(clubId: clubId));
+            },
+          ),
+        ],
+      ),
     ],
 
     // Error page
@@ -138,6 +206,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ),
   );
 });
+
+// ── Admin access guard ────────────────────────────────────────────────────────
+
+String? _adminGuard(String clubId, GoRouterState state) {
+  if (!kDemoMode) return '/club/$clubId';
+  // In demo mode: check kMockMembers directly (synchronous)
+  final uid = kDemoUser.uid;
+  final members = kMockMembers[clubId] ?? [];
+  try {
+    final member = members.firstWhere((m) => m.uid == uid);
+    final role = ClubRoleTag.fromString(member.roleTag);
+    if (kAdminRoles.contains(role)) return null; // allow
+  } catch (_) {}
+  return '/club/$clubId'; // redirect to public club page
+}
 
 // ── Page builder with custom transitions ──────────────────────────────────────
 

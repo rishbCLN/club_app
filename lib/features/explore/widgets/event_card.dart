@@ -193,6 +193,28 @@ class EventCard extends StatelessWidget {
                     ),
                   ),
 
+                  // HIRING badge for recruitmentDrive events
+                  if (event.eventType == EventType.recruitmentDrive.name) ...[
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: NexusColors.rose.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: NexusColors.rose.withOpacity(0.4),
+                        ),
+                      ),
+                      child: Text(
+                        'HIRING',
+                        style: NexusText.tag.copyWith(
+                          color: NexusColors.rose,
+                          fontSize: 8,
+                        ),
+                      ),
+                    ),
+                  ],
+
                   const Spacer(),
 
                   // View details ghost button

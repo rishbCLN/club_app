@@ -10,6 +10,7 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/utils/extensions.dart';
 import '../../../shared/widgets/shimmer_loader.dart';
+import '../../explore/widgets/filter_chips.dart';
 
 class EventsFeedScreen extends ConsumerStatefulWidget {
   const EventsFeedScreen({super.key});
@@ -95,6 +96,11 @@ class _EventsFeedScreenState extends ConsumerState<EventsFeedScreen>
 
             const SizedBox(height: 16),
 
+            // Event type filter chips
+            const FilterChipsRow(),
+
+            const SizedBox(height: 12),
+
             // Event lists
             Expanded(
               child: eventsAsync.when(
@@ -107,25 +113,36 @@ class _EventsFeedScreenState extends ConsumerState<EventsFeedScreen>
                 error: (e, _) => Center(
                   child: Text('Failed to load events.', style: NexusText.body),
                 ),
-                data: (events) => TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _EventList(
-                      events: events.where((e) => e.isUpcoming).toList(),
-                      emptyMessage: 'No upcoming events',
-                    ),
-                    _EventList(
-                      events: events.where((e) => e.isOngoing).toList(),
-                      emptyMessage: 'No ongoing events',
-                    ),
-                    _EventList(
-                      events: events
-                          .where((e) => !e.isUpcoming && !e.isOngoing)
-                          .toList(),
-                      emptyMessage: 'No past events',
-                    ),
-                  ],
-                ),
+                data: (events) {
+                  final filter = ref.watch(selectedFilterProvider);
+                  List<EventModel> applyFilter(List<EventModel> list) {
+                    if (filter == 'All') return list;
+                    return list.where((e) {
+                      final typeLabel =
+                          EventType.fromString(e.eventType).label.toLowerCase();
+                      return typeLabel == filter.toLowerCase();
+                    }).toList();
+                  }
+
+                  return TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _EventList(
+                        events: applyFilter(events.where((e) => e.isUpcoming).toList()),
+                        emptyMessage: 'No upcoming events',
+                      ),
+                      _EventList(
+                        events: applyFilter(events.where((e) => e.isOngoing).toList()),
+                        emptyMessage: 'No ongoing events',
+                      ),
+                      _EventList(
+                        events: applyFilter(
+                            events.where((e) => !e.isUpcoming && !e.isOngoing).toList()),
+                        emptyMessage: 'No past events',
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -239,6 +256,21 @@ class _FullEventCard extends StatelessWidget {
                           style: NexusText.tag.copyWith(color: eventType.color, fontSize: 9),
                         ),
                       ),
+                      if (event.eventType == EventType.recruitmentDrive.name) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: NexusColors.rose.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: NexusColors.rose.withOpacity(0.4)),
+                          ),
+                          child: Text(
+                            'HIRING',
+                            style: NexusText.tag.copyWith(color: NexusColors.rose, fontSize: 9),
+                          ),
+                        ),
+                      ],
                       if (event.hasCollaboration) ...[
                         const SizedBox(width: 6),
                         Container(

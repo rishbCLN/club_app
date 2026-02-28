@@ -18,6 +18,11 @@ class NexusTextField extends StatefulWidget {
     this.accentColor = NexusColors.cyan,
     this.textInputAction = TextInputAction.next,
     this.onSubmitted,
+    this.maxLines = 1,
+    this.maxLength,
+    this.readOnly = false,
+    this.onTap,
+    this.fontSize,
   });
 
   final TextEditingController controller;
@@ -32,6 +37,11 @@ class NexusTextField extends StatefulWidget {
   final Color accentColor;
   final TextInputAction textInputAction;
   final ValueChanged<String>? onSubmitted;
+  final int maxLines;
+  final int? maxLength;
+  final bool readOnly;
+  final VoidCallback? onTap;
+  final double? fontSize;
 
   @override
   State<NexusTextField> createState() => _NexusTextFieldState();
@@ -61,14 +71,22 @@ class _NexusTextFieldState extends State<NexusTextField> {
         child: TextFormField(
           controller: widget.controller,
           obscureText: widget.obscureText,
-          keyboardType: widget.keyboardType,
-          textInputAction: widget.textInputAction,
+          keyboardType: widget.maxLines > 1
+              ? TextInputType.multiline
+              : widget.keyboardType,
+          textInputAction: widget.maxLines > 1
+              ? TextInputAction.newline
+              : widget.textInputAction,
           onChanged: widget.onChanged,
           validator: widget.validator,
           onFieldSubmitted: widget.onSubmitted,
+          maxLines: widget.maxLines,
+          maxLength: widget.maxLength,
+          readOnly: widget.readOnly,
+          onTap: widget.onTap,
           style: GoogleFonts.dmSans(
             color: NexusColors.textPrimary,
-            fontSize: 15,
+            fontSize: widget.fontSize ?? 15,
           ),
           decoration: InputDecoration(
             labelText: widget.label,

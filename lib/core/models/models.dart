@@ -82,6 +82,7 @@ class ClubMemberModel extends Equatable {
     required this.roleTag,
     required this.joinedAt,
     required this.isAdmin,
+    this.rollNo = '',
   });
 
   final String uid;
@@ -90,6 +91,7 @@ class ClubMemberModel extends Equatable {
   final String roleTag;
   final DateTime joinedAt;
   final bool isAdmin;
+  final String rollNo;
 
   factory ClubMemberModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -285,4 +287,41 @@ class UserModel extends Equatable {
 
   @override
   List<Object?> get props => [uid, email];
+}
+
+// ── Join Request Model ─────────────────────────────────────────────────────────
+
+enum JoinRequestStatus { pending, approved, rejected }
+
+class JoinRequestModel extends Equatable {
+  const JoinRequestModel({
+    required this.id,
+    required this.userId,
+    required this.displayName,
+    this.avatarUrl,
+    required this.collegeRollNo,
+    required this.requestedAt,
+    required this.status,
+  });
+
+  final String id;
+  final String userId;
+  final String displayName;
+  final String? avatarUrl;
+  final String collegeRollNo;
+  final DateTime requestedAt;
+  final JoinRequestStatus status;
+
+  JoinRequestModel copyWith({JoinRequestStatus? status}) => JoinRequestModel(
+        id: id,
+        userId: userId,
+        displayName: displayName,
+        avatarUrl: avatarUrl,
+        collegeRollNo: collegeRollNo,
+        requestedAt: requestedAt,
+        status: status ?? this.status,
+      );
+
+  @override
+  List<Object?> get props => [id, status];
 }

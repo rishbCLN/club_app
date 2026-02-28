@@ -10,6 +10,7 @@ import '../../../core/constants/role_tags.dart';
 import '../../../core/constants/typography.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
+import '../../admin/providers/admin_providers.dart';
 import '../../../core/utils/extensions.dart';
 import '../../../shared/widgets/club_orb.dart';
 import '../../../shared/widgets/glassmorphic_card.dart';
@@ -68,6 +69,7 @@ class _ClubProfileScreenState extends ConsumerState<ClubProfileScreen>
 
         final accentColor = club.colorHex.toColor();
         final isMember = isMemberAsync.valueOrNull ?? false;
+        final isAdmin = ref.watch(isClubAdminProvider(widget.clubId));
 
         return Scaffold(
           backgroundColor: NexusColors.bg,
@@ -85,6 +87,14 @@ class _ClubProfileScreenState extends ConsumerState<ClubProfileScreen>
                 pinned: true,
                 backgroundColor: NexusColors.bg,
                 elevation: innerBoxIsScrolled ? 4 : 0,
+                actions: isAdmin
+                    ? [
+                        _AdminBadgeButton(
+                          clubId: widget.clubId,
+                          accentColor: accentColor,
+                        ),
+                      ]
+                    : null,
                 leading: Padding(
                   padding: const EdgeInsets.only(left: 16),
                   child: GlassmorphicCard(
@@ -549,6 +559,53 @@ class _DefaultClubBanner extends StatelessWidget {
           center: Alignment.topCenter,
           radius: 1.2,
           colors: [accentColor.withOpacity(0.3), NexusColors.surface],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Admin Badge Button ────────────────────────────────────────────────────────
+
+class _AdminBadgeButton extends StatelessWidget {
+  const _AdminBadgeButton({
+    required this.clubId,
+    required this.accentColor,
+  });
+
+  final String clubId;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Admin Panel',
+      child: Padding(
+        padding: const EdgeInsets.only(right: 12),
+        child: GestureDetector(
+          onTap: () => context.go('/club/$clubId/admin'),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: accentColor.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: accentColor.withOpacity(0.4)),
+              boxShadow: [
+                BoxShadow(
+                  color: accentColor.withOpacity(0.2),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.shield_outlined,
+              color: accentColor,
+              size: 18,
+            ),
+          ),
         ),
       ),
     );
