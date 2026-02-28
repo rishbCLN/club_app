@@ -1,0 +1,63 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Generated files
+*.g.dart
+*.freezed.dart
+
+# Symbolication & obfuscation
+app.*.symbols
+app.*.map.json
+
+# Android — machine-specific / secrets
+android/local.properties
+android/key.properties
+android/**/*.jks
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# iOS / macOS — CocoaPods & derived data
+ios/Pods/
+ios/.symlinks/
+macos/Pods/
+macos/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# Windows / Linux — build outputs handled by /build/ above
+
+# Firebase options — regenerate with: flutterfire configure
+# (keep firebase_options.dart committed if using Firebase)
+# lib/firebase_options.dart
