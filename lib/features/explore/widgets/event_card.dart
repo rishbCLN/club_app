@@ -50,24 +50,29 @@ class EventCard extends StatelessWidget {
               // Club name tag
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: accentColor.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: accentColor.withOpacity(0.3),
-                        width: 1,
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: accentColor.withOpacity(0.3),
+                          width: 1,
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      event.clubName,
-                      style: NexusText.tag.copyWith(
-                        color: accentColor,
-                        fontSize: 9,
+                      child: Text(
+                        event.clubName,
+                        style: NexusText.tag.copyWith(
+                          color: accentColor,
+                          fontSize: 9,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
+                  const SizedBox(width: 6),
                   const Spacer(),
                   // Collab badge
                   if (event.hasCollaboration)
@@ -133,9 +138,12 @@ class EventCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  Text(
-                    event.startDate.relativeLabel,
-                    style: NexusText.bodySmall,
+                  Flexible(
+                    child: Text(
+                      event.startDate.relativeLabel,
+                      style: NexusText.bodySmall,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   if (event.isOngoing) ...[
                     const SizedBox(width: 6),
@@ -163,20 +171,24 @@ class EventCard extends StatelessWidget {
               Row(
                 children: [
                   // Event type chip
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: eventType.color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: eventType.color.withOpacity(0.25),
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: eventType.color.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: eventType.color.withOpacity(0.25),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      eventType.label.toUpperCase(),
-                      style: NexusText.tag.copyWith(
-                        color: eventType.color,
-                        fontSize: 8,
+                      child: Text(
+                        eventType.label.toUpperCase(),
+                        style: NexusText.tag.copyWith(
+                          color: eventType.color,
+                          fontSize: 8,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
