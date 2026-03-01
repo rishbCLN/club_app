@@ -17,9 +17,17 @@ import '../mock/mock_data.dart';
 
 const kDemoMode = true;
 
+// ── User role enum ────────────────────────────────────────────────────────────
+
+enum UserRole { admin, user, none }
+
 // ── Demo login state (toggled by login / logout buttons in demo) ───────────────
 
-final demoLoggedInProvider = StateProvider<bool>((ref) => true);
+final demoLoggedInProvider = StateProvider<bool>((ref) => false);
+
+// ── Demo user role (admin or user) ─────────────────────────────────────────────
+
+final demoUserRoleProvider = StateProvider<UserRole>((ref) => UserRole.none);
 
 // ── "Is logged in" — single source of truth for all screens ───────────────────
 
@@ -28,11 +36,22 @@ final isLoggedInProvider = Provider<bool>((ref) {
   return false;
 });
 
+// ── Current user role ──────────────────────────────────────────────────────────
+
+final currentUserRoleProvider = Provider<UserRole>((ref) {
+  if (kDemoMode) return ref.watch(demoUserRoleProvider);
+  return UserRole.none;
+});
+
 // ── Current user UID ───────────────────────────────────────────────────────────
 
 final currentUidProvider = Provider<String?>((ref) {
   if (!ref.watch(isLoggedInProvider)) return null;
-  if (kDemoMode) return kDemoUser.uid;
+  if (kDemoMode) {
+    final role = ref.watch(demoUserRoleProvider);
+    if (role == UserRole.admin) return 'admin_demo_user';
+    if (role == UserRole.user) return 'demo_user_001';
+  }
   return null;
 });
 

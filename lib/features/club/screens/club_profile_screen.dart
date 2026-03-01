@@ -567,7 +567,7 @@ class _DefaultClubBanner extends StatelessWidget {
 
 // ── Admin Badge Button ────────────────────────────────────────────────────────
 
-class _AdminBadgeButton extends StatelessWidget {
+class _AdminBadgeButton extends StatefulWidget {
   const _AdminBadgeButton({
     required this.clubId,
     required this.accentColor,
@@ -577,33 +577,47 @@ class _AdminBadgeButton extends StatelessWidget {
   final Color accentColor;
 
   @override
+  State<_AdminBadgeButton> createState() => _AdminBadgeButtonState();
+}
+
+class _AdminBadgeButtonState extends State<_AdminBadgeButton> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: 'Admin Panel',
+      message: 'Admin Panel - Click to manage club',
       child: Padding(
-        padding: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.only(right: 16),
         child: GestureDetector(
-          onTap: () => context.go('/club/$clubId/admin'),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              color: accentColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: accentColor.withOpacity(0.4)),
-              boxShadow: [
-                BoxShadow(
-                  color: accentColor.withOpacity(0.2),
-                  blurRadius: 8,
-                  spreadRadius: 1,
+          onTap: () => context.go('/club/${widget.clubId}/admin'),
+          child: MouseRegion(
+            onEnter: (_) => setState(() => _isHovered = true),
+            onExit: (_) => setState(() => _isHovered = false),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: _isHovered ? 44 : 40,
+              height: _isHovered ? 44 : 40,
+              decoration: BoxDecoration(
+                color: widget.accentColor.withOpacity(_isHovered ? 0.18 : 0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: widget.accentColor.withOpacity(_isHovered ? 0.6 : 0.4),
+                  width: _isHovered ? 2 : 1.5,
                 ),
-              ],
-            ),
-            child: Icon(
-              Icons.shield_outlined,
-              color: accentColor,
-              size: 18,
+                boxShadow: [
+                  BoxShadow(
+                    color: widget.accentColor.withOpacity(_isHovered ? 0.4 : 0.2),
+                    blurRadius: _isHovered ? 16 : 8,
+                    spreadRadius: _isHovered ? 2 : 1,
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.shield,
+                color: widget.accentColor,
+                size: _isHovered ? 22 : 20,
+              ),
             ),
           ),
         ),

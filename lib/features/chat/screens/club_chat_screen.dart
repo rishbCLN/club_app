@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -89,14 +90,11 @@ class _ClubChatScreenState extends ConsumerState<ClubChatScreen> {
       demoSendMessage(widget.clubId, msg);
     }
 
-    // Scroll to bottom
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+    // Auto-scroll to show new message at bottom
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _scrollController.hasClients) {
+        // With reverse: true, scroll to top (position 0) to see newest message
+        _scrollController.jumpTo(0.0);
       }
     });
   }

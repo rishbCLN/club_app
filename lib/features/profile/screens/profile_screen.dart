@@ -35,11 +35,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _logout() async {
     if (kDemoMode) {
       ref.read(demoLoggedInProvider.notifier).state = false;
-      if (mounted) context.go('/home/explore');
+      ref.read(demoUserRoleProvider.notifier).state = UserRole.none;
+      if (mounted) context.go('/auth/login');
       return;
     }
     await FirebaseAuth.instance.signOut();
-    if (mounted) context.go('/home/explore');
+    if (mounted) context.go('/auth/login');
   }
 
   @override

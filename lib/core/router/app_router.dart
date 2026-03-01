@@ -11,8 +11,7 @@ import '../../features/events/screens/event_detail_screen.dart';
 import '../../features/explore/screens/explore_screen.dart';
 import '../../features/my_clubs/screens/my_clubs_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
-import '../../features/splash/splash_screen.dart';
-import '../../features/onboarding/onboarding_screen.dart';
+import '../../features/admin/screens/admin_home_screen.dart';
 import '../../features/admin/screens/club_admin_dashboard_screen.dart';
 import '../../features/admin/screens/create_event_screen.dart';
 import '../../features/admin/screens/edit_event_screen.dart';
@@ -25,46 +24,46 @@ import '../mock/mock_data.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final isLoggedIn = ref.watch(isLoggedInProvider);
+  final userRole = ref.watch(currentUserRoleProvider);
 
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/auth/login',
     debugLogDiagnostics: false,
     redirect: (context, state) {
-      // Allow splash and onboarding always
-      if (state.fullPath == '/' || state.fullPath == '/onboarding') return null;
-
-      // Auth-gated routes
-      final authGated = [
-        '/home/my-clubs',
-        '/home/profile',
-      ];
-      final isAuthGated = authGated.any((p) => state.fullPath?.startsWith(p) ?? false);
-
-      if (isAuthGated && !isLoggedIn) {
+      // If not logged in, go to login
+      if (!isLoggedIn) {
+        if (state.fullPath == '/auth/login') return null;
         return '/auth/login';
+      }
+
+      // If on login page but already logged in, redirect to home
+      if (state.fullPath == '/auth/login') {
+        if (userRole == UserRole.admin) return '/admin/dashboard';
+        return '/home/explore';
+      }
+
+      // Protect admin routes
+      final adminRoutes = [
+        '/admin/dashboard',
+        '/admin/clubs',
+      ];
+      final isAdminRoute = adminRoutes.any((p) => state.fullPath?.startsWith(p) ?? false);
+      if (isAdminRoute && userRole != UserRole.admin) {
+        return '/home/explore';
+      }
+
+      // Protect user routes
+      final userRoutes = [
+        '/home',
+      ];
+      final isUserRoute = userRoutes.any((p) => state.fullPath?.startsWith(p) ?? false);
+      if (isUserRoute && userRole != UserRole.user) {
+        return '/admin/dashboard';
       }
 
       return null;
     },
     routes: [
-      // Splash
-      GoRoute(
-        path: '/',
-        pageBuilder: (context, state) => _buildPage(
-          state,
-          const SplashScreen(),
-        ),
-      ),
-
-      // Onboarding
-      GoRoute(
-        path: '/onboarding',
-        pageBuilder: (context, state) => _buildPage(
-          state,
-          const OnboardingScreen(),
-        ),
-      ),
-
       // Auth
       GoRoute(
         path: '/auth/login',
@@ -75,7 +74,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _buildPage(state, const SignupScreen()),
       ),
 
-      // Shell (home with bottom nav)
+      // Admin Dashboard
+      GoRoute(
+        path: '/admin/dashboard',
+        pageBuilder: (context, state) => _buildPage(state, const AdminHomeScreen()),
+      ),
+
+      // Shell (home with bottom nav) — User interface
       ShellRoute(
         builder: (context, state, child) => NexusShell(child: child),
         routes: [
@@ -210,8 +215,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 // ── Admin access guard ────────────────────────────────────────────────────────
 
 String? _adminGuard(String clubId, GoRouterState state) {
-  if (!kDemoMode) return '/club/$clubId';
+  // This guard is for club-specific admin panels
   // In demo mode: check kMockMembers directly (synchronous)
+  if (!kDemoMode) return '/club/$clubId';
+  
   final uid = kDemoUser.uid;
   final members = kMockMembers[clubId] ?? [];
   try {

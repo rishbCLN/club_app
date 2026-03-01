@@ -44,8 +44,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       if (kDemoMode) {
         await Future.delayed(const Duration(milliseconds: 600));
+        
+        // Validate hardcoded credentials
+        final username = _emailCtrl.text.trim();
+        final password = _passwordCtrl.text.trim();
+        UserRole? role;
+
+        if (username == 'admin' && password == 'admin') {
+          role = UserRole.admin;
+        } else if (username == 'user' && password == 'user') {
+          role = UserRole.user;
+        } else {
+          setState(() => _errorMessage = 'Invalid username or password. Try "user"/"user" or "admin"/"admin"');
+          if (mounted) setState(() => _isLoading = false);
+          return;
+        }
+
+        // Set login state and role
         ref.read(demoLoggedInProvider.notifier).state = true;
-        if (mounted) context.go('/home/explore');
+        ref.read(demoUserRoleProvider.notifier).state = role;
+
+        // Navigate to appropriate home screen
+        if (mounted) {
+          if (role == UserRole.admin) {
+            context.go('/admin/dashboard');
+          } else {
+            context.go('/home/explore');
+          }
+        }
         return;
       }
       // --- production path ---
@@ -70,53 +96,45 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 60),
 
-                  // Back button
-                  GestureDetector(
-                    onTap: () => context.go('/home/explore'),
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: NexusColors.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: NexusColors.border),
-                      ),
-                      child: const Icon(
-                        Icons.arrow_back,
-                        color: NexusColors.textSecondary,
-                        size: 20,
-                      ),
-                    ),
-                  ),
+                  // Heading
+                  Text('NEXUS', style: NexusText.appBarTitle.copyWith(
+                    color: NexusColors.cyan,
+                    letterSpacing: 4,
+                  ))
+                      .animate()
+                      .fadeIn(duration: 500.ms)
+                      .slideY(begin: 0.2, end: 0, duration: 500.ms),
 
                   const SizedBox(height: 48),
 
-                  // Heading
-                  Text('Welcome\nback.', style: NexusText.heroTitle)
-                      .animate()
+                  Text('Sign in to\nyour account.', style: NexusText.heroTitle)
+                      .animate(delay: 100.ms)
                       .fadeIn(duration: 500.ms)
                       .slideY(begin: 0.2, end: 0, duration: 500.ms),
 
                   const SizedBox(height: 8),
 
                   Text(
-                    'Sign in to access your club chats and dashboard.',
-                    style: NexusText.body,
+                    'Admin: admin / Admin Password: admin\nUser: user / User Password: user',
+                    style: NexusText.bodySmall.copyWith(
+                      color: NexusColors.cyan.withOpacity(0.7),
+                      height: 1.6,
+                    ),
                   ).animate(delay: 100.ms).fadeIn(duration: 400.ms),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 56),
 
-                  // Email field
+                  // Username field
                   NexusTextField(
                     controller: _emailCtrl,
-                    label: 'College Email',
-                    hint: 'you@college.edu',
-                    prefixIcon: Icons.mail_outline,
-                    keyboardType: TextInputType.emailAddress,
+                    label: 'Username',
+                    hint: 'user or admin',
+                    prefixIcon: Icons.person_outline,
+                    keyboardType: TextInputType.text,
                     validator: (v) {
-                      if (v == null || v.isEmpty) return 'Email is required';
-                      if (!v.contains('@')) return 'Enter a valid email';
+                      if (v == null || v.isEmpty) return 'Username is required';
                       return null;
                     },
                   ).animate(delay: 200.ms).fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
@@ -141,32 +159,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     validator: (v) {
                       if (v == null || v.isEmpty) return 'Password is required';
-                      if (v.length < 6) return 'Password too short';
                       return null;
                     },
                   ).animate(delay: 280.ms).fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
 
-                  const SizedBox(height: 10),
-
-                  // Forgot password
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        // TODO: implement forgot password
-                      },
-                      child: Text(
-                        'Forgot password?',
-                        style: NexusText.bodySmall.copyWith(
-                          color: NexusColors.cyan.withOpacity(0.7),
-                        ),
-                      ),
-                    ),
-                  ),
+                  const SizedBox(height: 28),
 
                   // Error message
                   if (_errorMessage != null) ...[
-                    const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -191,9 +191,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ],
                       ),
                     ).animate().fadeIn(duration: 300.ms).shakeX(),
+                    const SizedBox(height: 20),
                   ],
-
-                  const SizedBox(height: 28),
 
                   // Login button
                   GlowingButton(
@@ -203,35 +202,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     fullWidth: true,
                     icon: Icons.login,
                   ).animate(delay: 350.ms).fadeIn(duration: 400.ms),
-
-                  const SizedBox(height: 24),
-
-                  // Divider
-                  Row(
-                    children: [
-                      const Expanded(child: Divider(color: NexusColors.border)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                        child: Text(
-                          'No account yet?',
-                          style: NexusText.bodySmall,
-                        ),
-                      ),
-                      const Expanded(child: Divider(color: NexusColors.border)),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Sign up button
-                  GlowingButton(
-                    label: 'Create Account',
-                    onTap: () => context.go('/auth/signup'),
-                    isOutlined: true,
-                    fullWidth: true,
-                    color1: NexusColors.violet,
-                    color2: NexusColors.violet,
-                  ).animate(delay: 420.ms).fadeIn(duration: 400.ms),
 
                   const SizedBox(height: 40),
                 ],
